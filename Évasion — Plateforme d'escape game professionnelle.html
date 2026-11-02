@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Évasion — Plateforme d'escape game professionnelle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* ── TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:   #08080f;
+  --su:   #0f0f1a;
+  --su2:  #14141f;
+  --bd:   #1e1e2e;
+  --tx:   #f0eeff;
+  --mu:   #7a7a9a;
+  --ac:   #c8f000;
+  --ac2:  #a8cc00;
+  --ko:   #ff4d4f;
+  --ok:   #22c55e;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--tx);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.wrap   { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+.wrap-s { max-width: 640px;  margin: 0 auto; padding: 0 24px; }
+
+/* ── VIEWS ──────────────────────────────────────────── */
+.view { display: none; }
+.view.on { display: block; }
+
+/* ── NAV ────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid var(--bd);
+  background: rgba(8,8,15,.85); backdrop-filter: blur(16px);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; gap: 20px;
+}
+.brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; letter-spacing: -.01em; color: var(--tx);
+  text-decoration: none; flex-shrink: 0;
+}
+.brand span { color: var(--ac); }
+.nav-links { display: flex; gap: 28px; }
+.nav-links a {
+  font-size: 14px; color: var(--mu); text-decoration: none;
+  transition: color .15s;
+}
+.nav-links a:hover { color: var(--tx); }
+.nav-cta { display: flex; gap: 10px; }
+
+/* ── BUTTONS ────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 11px 22px; border: 0; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .15s; text-decoration: none; white-space: nowrap;
+}
+.btn-primary   { background: var(--ac); color: #08080f; }
+.btn-primary:hover { background: var(--ac2); }
+.btn-ghost  { background: transparent; color: var(--tx); border: 1px solid var(--bd); }
+.btn-ghost:hover  { border-color: var(--mu); }
+.btn-danger { background: var(--ko); color: #fff; }
+.btn-lg { padding: 16px 32px; font-size: 16px; border-radius: 12px; }
+.btn-block { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── INPUTS ─────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-size: 13px; font-weight: 500; color: var(--mu); }
+input, select, textarea {
+  background: var(--su2); border: 1px solid var(--bd); border-radius: 10px;
+  padding: 12px 14px; color: var(--tx); font-family: inherit; font-size: 15px;
+  width: 100%; transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--ac);
+}
+input::placeholder { color: var(--mu); }
+.input-code {
+  font-size: 36px; font-weight: 700; letter-spacing: .3em;
+  text-align: center; text-transform: uppercase; padding: 18px;
+}
+
+/* ── CARDS ──────────────────────────────────────────── */
+.card {
+  background: var(--su); border: 1px solid var(--bd);
+  border-radius: 16px; padding: 24px;
+}
+.card + .card { margin-top: 12px; }
+.card-sm { padding: 16px; border-radius: 12px; }
+
+/* ── HERO ────────────────────────────────────────────── */
+#hero {
+  padding: 120px 24px 100px;
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,240,0,.12), transparent);
+  text-align: center;
+}
+.hero-tag {
+  display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .08em;
+  color: var(--ac); border: 1px solid rgba(200,240,0,.3);
+  border-radius: 99px; padding: 5px 14px; margin-bottom: 28px;
+}
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(40px, 7vw, 72px);
+  line-height: 1.05; letter-spacing: -.03em; margin: 0 0 20px;
+  max-width: 800px; margin-left: auto; margin-right: auto;
+}
+.hero-sub {
+  font-size: clamp(16px, 2vw, 19px); color: var(--mu); max-width: 520px;
+  margin: 0 auto 36px; line-height: 1.6;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-stat {
+  margin-top: 64px; display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+}
+.hero-stat div { text-align: center; }
+.hero-stat strong {
+  display: block; font-family: 'DM Serif Display', serif;
+  font-size: 36px; color: var(--ac);
+}
+.hero-stat span { font-size: 14px; color: var(--mu); }
+
+/* ── SECTION ─────────────────────────────────────────── */
+.section { padding: 80px 0; }
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(28px, 4vw, 40px); letter-spacing: -.02em; margin: 0 0 8px;
+}
+.section-sub { color: var(--mu); font-size: 17px; margin: 0 0 48px; }
+
+/* ── FEATURES ────────────────────────────────────────── */
+.features { display: grid; gap: 2px; }
+@media (min-width: 720px) { .features { grid-template-columns: repeat(3, 1fr); } }
+.feat {
+  background: var(--su); padding: 32px 28px;
+}
+.feat:first-child { border-radius: 16px 0 0 16px; }
+.feat:last-child  { border-radius: 0 16px 16px 0; }
+@media (max-width: 719px) {
+  .feat:first-child { border-radius: 16px 16px 0 0; }
+  .feat:last-child  { border-radius: 0 0 16px 16px; }
+}
+.feat-ico {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(200,240,0,.1); display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.feat-ico svg { stroke: var(--ac); }
+.feat h3 { font-size: 18px; margin: 0 0 8px; letter-spacing: -.01em; }
+.feat p  { font-size: 14px; color: var(--mu); margin: 0; line-height: 1.6; }
+
+/* ── QR SECTION ──────────────────────────────────────── */
+.qr-demo {
+  display: grid; gap: 40px; align-items: center;
+}
+@media (min-width: 720px) { .qr-demo { grid-template-columns: 1fr 1fr; } }
+.qr-frame {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 32px; text-align: center; position: relative; overflow: hidden;
+}
+.qr-frame::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 120%, rgba(200,240,0,.06), transparent 60%);
+}
+#qr-preview { display: inline-block; background: #fff; padding: 12px; border-radius: 12px; }
+.qr-label {
+  margin-top: 16px; font-size: 13px; color: var(--mu);
+}
+.qr-badge {
+  display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 600;
+  background: rgba(200,240,0,.1); color: var(--ac);
+  border: 1px solid rgba(200,240,0,.2); border-radius: 99px; padding: 3px 12px;
+}
+.qr-features { display: flex; flex-direction: column; gap: 20px; }
+.qr-feat { display: flex; gap: 16px; align-items: flex-start; }
+.qr-feat-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--ac);
+  margin-top: 7px; flex-shrink: 0;
+}
+.qr-feat h4 { font-size: 16px; margin: 0 0 4px; }
+.qr-feat p  { font-size: 14px; color: var(--mu); margin: 0; }
+
+/* ── PRICING ─────────────────────────────────────────── */
+.pricing-grid {
+  display: grid; gap: 16px;
+}
+@media (min-width: 720px) { .pricing-grid { grid-template-columns: repeat(3, 1fr); } }
+.price-card {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 28px; display: flex; flex-direction: column; gap: 20px;
+}
+.price-card.featured {
+  background: var(--su2); border-color: var(--ac); position: relative;
+}
+.price-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--ac); color: #08080f; font-size: 11px; font-weight: 700;
+  padding: 4px 14px; border-radius: 99px; white-space: nowrap;
+}
+.price-name { font-size: 14px; font-weight: 600; color: var(--mu); }
+.price-amount {
+  font-family: 'DM Serif Display', serif;
+  font-size: 42px; letter-spacing: -.03em; line-height: 1;
+}
+.price-amount sup { font-size: 20px; vertical-align: super; }
+.price-amount span { font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--mu); }
+.price-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.price-list li { font-size: 14px; color: var(--mu); display: flex; gap: 10px; align-items: flex-start; }
+.price-list li::before { content: '–'; color: var(--ac); flex-shrink: 0; }
+.price-list li.on { color: var(--tx); }
+.price-card .btn { margin-top: auto; }
+
+/* ── STORIES ─────────────────────────────────────────── */
+.stories-grid { display: grid; gap: 12px; }
+@media (min-width: 720px) { .stories-grid { grid-template-columns: repeat(2, 1fr); } }
+.story-card {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 16px;
+  padding: 24px; cursor: pointer; transition: border-color .15s;
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.story-card:hover, .story-card.sel { border-color: var(--ac); }
+.story-card.murder.sel { border-color: #ff6b6b; }
+.story-ico {
+  width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Serif Display', serif; font-size: 18px; font-weight: 400;
+  letter-spacing: -.02em;
+}
+.story-card:not(.murder) .story-ico { background: rgba(200,240,0,.1); color: var(--ac); }
+.story-card.murder .story-ico       { background: rgba(255,107,107,.1); color: #ff6b6b; }
+.story-info h3 { font-size: 16px; margin: 0 0 4px; letter-spacing: -.01em; }
+.story-info p  { font-size: 13px; color: var(--mu); margin: 0; }
+.story-meta    { margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px;
+  background: var(--su2); border: 1px solid var(--bd); color: var(--mu);
+}
+.tag.hard   { border-color: rgba(255,77,79,.3); color: #ff4d4f; background: rgba(255,77,79,.08); }
+.tag.medium { border-color: rgba(251,146,60,.3); color: #fb923c; background: rgba(251,146,60,.08); }
+.tag.easy   { border-color: rgba(34,197,94,.3);  color: #22c55e; background: rgba(34,197,94,.08); }
+.tag.murder { border-color: rgba(255,107,107,.3); color: #ff6b6b; background: rgba(255,107,107,.08); }
+
+/* ── DASHBOARD ───────────────────────────────────────── */
+#dash {
+  min-height: 100vh;
+  background: var(--bg);
+}
+.dash-header {
+  border-bottom: 1px solid var(--bd);
+  background: var(--su); padding: 20px 0;
+}
+.dash-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.dash-brand {
+  font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--tx);
+  text-decoration: none;
+}
+.dash-brand span { color: var(--ac); }
+.user-chip {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--mu);
+}
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ac); display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #08080f;
+}
+.dash-body { padding: 40px 0; }
+
+/* tabs */
+.tabs { display: flex; gap: 2px; background: var(--su); border-radius: 12px; padding: 4px; margin-bottom: 32px; }
+.tab {
+  flex: 1; padding: 9px 0; border: 0; border-radius: 9px; font: inherit;
+  font-size: 14px; font-weight: 500; cursor: pointer; color: var(--mu);
+  background: transparent; transition: all .15s;
+}
+.tab.on { background: var(--su2); color: var(--tx); }
+
+/* stats strip */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.stat-box {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 14px; padding: 20px;
+}
+.stat-box .val {
+  font-family: 'DM Serif Display', serif; font-size: 30px; letter-spacing: -.02em;
+}
+.stat-box .lbl { font-size: 13px; color: var(--mu); margin-top: 2px; }
+
+/* table */
+.table-wrap { background: var(--su); border: 1px solid var(--bd); border-radius: 16px; overflow: hidden; }
+.table-head {
+  display: grid; grid-template-columns: 1fr 120px 100px 100px 96px;
+  padding: 14px 20px; border-bottom: 1px solid var(--bd);
+  font-size: 12px; font-weight: 600; color: var(--mu); letter-spacing: .04em;
+}
+.table-row {
+  display: grid; grid-template-columns: 1fr 120px 100px 100px 96px;
+  padding: 16px 20px; border-bottom: 1px solid var(--bd); align-items: center;
+  font-size: 14px;
+}
+.table-row:last-child { border-bottom: 0; }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
+}
+.badge-active { background: rgba(34,197,94,.1); color: var(--ok); }
+.badge-done   { background: rgba(122,122,154,.1); color: var(--mu); }
+.badge-paid   { background: rgba(200,240,0,.1); color: var(--ac); }
+
+/* qr panel */
+.qr-panel {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 32px; text-align: center;
+}
+.qr-panel canvas, .qr-panel img { border-radius: 8px; }
+.session-code {
+  font-family: 'DM Serif Display', serif; font-size: 48px; letter-spacing: .2em;
+  color: var(--ac); margin: 16px 0 4px;
+}
+
+/* ── GAME UI ─────────────────────────────────────────── */
+#game { min-height: 100vh; background: var(--bg); }
+.game-top {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(8,8,15,.9); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bd);
+}
+.game-top-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 24px;
+}
+.timer {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+.timer.warning { color: var(--ko); }
+.progress-bar { height: 2px; background: var(--bd); }
+.progress-bar i { display: block; height: 100%; background: var(--ac); transition: width .5s; }
+.game-body { padding: 32px 24px 56px; max-width: 640px; margin: 0 auto; }
+
+.step-dots {
+  display: flex; gap: 6px; margin-bottom: 28px;
+}
+.step-dots i {
+  flex: 1; height: 3px; border-radius: 99px; background: var(--bd);
+}
+.step-dots .done { background: var(--ok); }
+.step-dots .curr { background: var(--ac); }
+
+.enigma-title {
+  font-family: 'DM Serif Display', serif; font-size: clamp(22px, 4vw, 30px);
+  letter-spacing: -.02em; margin: 0 0 16px;
+}
+.clue-card {
+  background: var(--su2); border: 1px solid var(--bd); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 8px; font-size: 14px; color: var(--mu);
+  border-left: 3px solid var(--ac);
+}
+.event-msg {
+  font-size: 14px; color: var(--mu); padding: 10px 14px;
+  background: var(--su); border-radius: 10px; margin-top: 10px;
+}
+.event-msg.ok { color: var(--ok); border-left: 2px solid var(--ok); }
+.event-msg.ko { color: var(--ko); border-left: 2px solid var(--ko); }
+.ans-row { display: flex; gap: 10px; margin-top: 20px; }
+.ans-row input { flex: 1; }
+
+/* role card */
+.role-card {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 28px; position: relative; overflow: hidden;
+}
+.role-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(200,240,0,.06), transparent);
+}
+.role-tier {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  padding: 4px 12px; border-radius: 99px; border: 1px solid; display: inline-block; margin-bottom: 16px;
+}
+.role-tier.principal { color: var(--ac); border-color: rgba(200,240,0,.3); background: rgba(200,240,0,.06); }
+.role-tier.secondary  { color: var(--mu); border-color: var(--bd); }
+.role-name {
+  font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -.02em; margin: 0 0 6px;
+}
+.role-desc { font-size: 15px; color: var(--mu); margin: 0 0 20px; }
+.secret-block {
+  background: var(--bg); border: 1px solid var(--bd); border-radius: 12px;
+  padding: 16px;
+}
+.secret-block h4 { font-size: 12px; font-weight: 600; color: var(--mu); margin: 0 0 8px; letter-spacing: .06em; }
+.secret-block p  { font-size: 15px; margin: 0; }
+
+/* vote */
+.vote-grid { display: grid; gap: 10px; }
+@media (min-width: 480px) { .vote-grid { grid-template-columns: repeat(2, 1fr); } }
+.vote-btn {
+  background: var(--su); border: 1.5px solid var(--bd); border-radius: 14px;
+  padding: 18px 16px; cursor: pointer; text-align: left; font: inherit;
+  color: var(--tx); transition: border-color .15s;
+}
+.vote-btn:hover { border-color: var(--mu); }
+.vote-btn.sel  { border-color: var(--ac); background: rgba(200,240,0,.04); }
+.vote-btn .vn  { font-size: 15px; font-weight: 600; display: block; margin-bottom: 2px; }
+.vote-btn .vp  { font-size: 13px; color: var(--mu); }
+
+/* end */
+.end-banner {
+  text-align: center; padding: 48px 24px;
+}
+.end-title {
+  font-family: 'DM Serif Display', serif; font-size: clamp(32px, 6vw, 52px);
+  letter-spacing: -.03em; margin: 0 0 12px;
+}
+.end-score {
+  font-size: 15px; color: var(--mu); margin: 0 0 32px;
+}
+.reveal-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.reveal-table td { padding: 12px 0; border-bottom: 1px solid var(--bd); font-size: 14px; }
+.reveal-table td:last-child { text-align: right; color: var(--mu); }
+
+/* players strip */
+.players-strip {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px;
+}
+.player-chip {
+  font-size: 13px; padding: 5px 12px; border-radius: 99px;
+  background: var(--su2); border: 1px solid var(--bd); color: var(--mu);
+}
+.player-chip.me { border-color: var(--ac); color: var(--ac); }
+
+/* ── MODALS ──────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(8,8,15,.8);
+  backdrop-filter: blur(8px); z-index: 100;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.overlay.on { display: flex; }
+.modal {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 32px; width: 100%; max-width: 440px;
+}
+.modal-title {
+  font-family: 'DM Serif Display', serif; font-size: 24px; letter-spacing: -.02em;
+  margin: 0 0 24px;
+}
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+/* ── AUTH ────────────────────────────────────────────── */
+#auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.auth-box { background: var(--su); border: 1px solid var(--bd); border-radius: 24px; padding: 40px; width: 100%; max-width: 400px; }
+.auth-logo { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 28px; }
+.auth-logo span { color: var(--ac); }
+.auth-title { font-size: 20px; font-weight: 600; margin: 0 0 6px; letter-spacing: -.01em; }
+.auth-sub { font-size: 14px; color: var(--mu); margin: 0 0 24px; }
+.auth-switch { font-size: 14px; color: var(--mu); text-align: center; margin-top: 20px; }
+.auth-switch a { color: var(--ac); text-decoration: none; cursor: pointer; }
+.stripe-row {
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  background: var(--su2); border: 1px solid var(--bd); border-radius: 12px; margin-bottom: 16px;
+}
+.stripe-row svg { flex-shrink: 0; }
+.stripe-row p { font-size: 13px; color: var(--mu); margin: 0; }
+.stripe-row strong { color: var(--tx); }
+.divider {
+  display: flex; align-items: center; gap: 12px; margin: 20px 0;
+  font-size: 12px; color: var(--mu);
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--bd); }
+
+/* ── JOIN ────────────────────────────────────────────── */
+#join-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.join-box { background: var(--su); border: 1px solid var(--bd); border-radius: 24px; padding: 40px; width: 100%; max-width: 400px; }
+.join-title { font-family: 'DM Serif Display', serif; font-size: 26px; letter-spacing: -.02em; margin: 0 0 8px; }
+.join-sub { font-size: 14px; color: var(--mu); margin: 0 0 24px; }
+
+/* ── TOAST ───────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--su); border: 1px solid var(--bd); border-radius: 12px;
+  padding: 12px 20px; font-size: 14px; z-index: 200;
+  opacity: 0; transition: opacity .2s; pointer-events: none; white-space: nowrap;
+}
+#toast.on { opacity: 1; }
+
+/* ── LOBBY ───────────────────────────────────────────── */
+.lobby-panel { padding: 40px 24px; max-width: 520px; margin: 0 auto; }
+.lobby-code-block {
+  background: var(--su); border: 1px solid var(--bd); border-radius: 20px;
+  padding: 32px; text-align: center; margin-bottom: 16px;
+}
+.lobby-qr-frame { display: inline-block; background: #fff; padding: 10px; border-radius: 12px; }
+.secure-note {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--mu); margin-top: 8px;
+}
+.secure-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .nav-links { display: none; }
+  .table-head, .table-row { grid-template-columns: 1fr 80px 80px; }
+  .table-head > *:nth-child(4), .table-row > *:nth-child(4),
+  .table-head > *:nth-child(5), .table-row > *:nth-child(5) { display: none; }
+  .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-box { padding: 14px; }
+  .stat-box .val { font-size: 22px; }
+  .hero-stat { gap: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- LANDING ─────────────────────────────────────────── -->
+<div id="landing" class="view on">
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" href="#">Éva<span>sion</span></a>
+      <div class="nav-links">
+        <a href="#features-anchor">Fonctionnalités</a>
+        <a href="#stories-anchor">Histoires</a>
+        <a href="#pricing-anchor">Tarifs</a>
+      </div>
+      <div class="nav-cta">
+        <button class="btn btn-ghost btn-sm" onclick="show('login')">Connexion</button>
+        <button class="btn btn-primary btn-sm" onclick="show('signup')">Essai gratuit</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-tag">Plateforme d'escape game professionnelle</div>
+    <h1 class="hero-title">L'escape game<br>pour tous vos événements</h1>
+    <p class="hero-sub">Créez une partie en quelques secondes, partagez un QR code sécurisé et jouez avec jusqu'à 12 joueurs, en salle ou à distance.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" onclick="show('signup')">Démarrer — c'est gratuit</button>
+      <button class="btn btn-ghost btn-lg" onclick="show('dash')">Voir la démo</button>
+    </div>
+    <div class="hero-stat">
+      <div><strong>4</strong><span>Histoires disponibles</span></div>
+      <div><strong>12</strong><span>Joueurs par partie</span></div>
+      <div><strong>100%</strong><span>QR codes sécurisés</span></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features-anchor">
+    <div class="wrap">
+      <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+      <p class="section-sub">Conçu pour les organisateurs d'événements, les équipes et les particuliers.</p>
+      <div class="features">
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="20" height="20" fill="none" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="17" y="17" width="4" height="4" rx="1"/></svg>
+          </div>
+          <h3>QR codes sécurisés</h3>
+          <p>Chaque QR code est unique et ne fonctionne qu'avec Évasion. Impossible d'y accéder avec une autre application.</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="20" height="20" fill="none" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <h3>Rôles dynamiques</h3>
+          <p>Les rôles principaux et secondaires sont distribués automatiquement selon l'ordre d'arrivée. Chaque partie est unique.</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg width="20" height="20" fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Dashboard complet</h3>
+          <p>Suivez vos parties en temps réel, consultez l'historique et gérez vos QR codes personnalisés depuis un seul endroit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QR CODE SECTION -->
+  <section class="section" style="border-top: 1px solid var(--bd)">
+    <div class="wrap">
+      <div class="qr-demo">
+        <div>
+          <h2 class="section-title">QR codes à votre image</h2>
+          <p class="section-sub" style="margin-bottom: 28px">Chaque code porte votre logo et les couleurs de votre événement. Imprimez-les, affichez-les sur écran ou envoyez-les par message.</p>
+          <div class="qr-features">
+            <div class="qr-feat">
+              <div class="qr-feat-dot"></div>
+              <div>
+                <h4>Accès exclusif</h4>
+                <p>Le QR code redirige vers Évasion uniquement. Un scan depuis une autre application ne fonctionne pas.</p>
+              </div>
+            </div>
+            <div class="qr-feat">
+              <div class="qr-feat-dot"></div>
+              <div>
+                <h4>Logo intégré</h4>
+                <p>Votre logo apparaît au centre du QR code généré. Compatible avec tous les formats d'impression.</p>
+              </div>
+            </div>
+            <div class="qr-feat">
+              <div class="qr-feat-dot"></div>
+              <div>
+                <h4>Valable une seule fois</h4>
+                <p>Chaque QR code expire à la fin de la partie. Impossible de rejoindre une session fermée.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="qr-frame">
+          <div id="qr-preview"></div>
+          <div class="qr-label">QR code d'exemple</div>
+          <div class="qr-badge">Sécurisé — Évasion uniquement</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORIES -->
+  <section class="section" style="border-top: 1px solid var(--bd)" id="stories-anchor">
+    <div class="wrap">
+      <h2 class="section-title">Quatre histoires disponibles</h2>
+      <p class="section-sub">Des scénarios conçus pour être joués à voix haute, ensemble.</p>
+      <div class="stories-grid">
+        <div class="story-card sel" onclick="selectStory(this,0)">
+          <div class="story-ico">MB</div>
+          <div class="story-info">
+            <h3>Le Manoir Blackwood</h3>
+            <p>Retrouvez le meurtrier de Lord Blackwood avant que les portes ne se referment.</p>
+            <div class="story-meta"><span class="tag">25 min</span><span class="tag hard">Difficile</span><span class="tag">4 énigmes</span></div>
+          </div>
+        </div>
+        <div class="story-card" onclick="selectStory(this,1)">
+          <div class="story-ico">O7</div>
+          <div class="story-info">
+            <h3>Station Orion-7</h3>
+            <p>La station dérive vers les astéroïdes. Rejoignez la capsule avant que le temps s'arrête.</p>
+            <div class="story-meta"><span class="tag">20 min</span><span class="tag medium">Moyen</span><span class="tag">4 énigmes</span></div>
+          </div>
+        </div>
+        <div class="story-card" onclick="selectStory(this,2)">
+          <div class="story-ico">TR</div>
+          <div class="story-info">
+            <h3>Le Trésor de Barbe-Rouge</h3>
+            <p>La carte du pirate est entre vos mains. Trouvez le trésor avant que la marée monte.</p>
+            <div class="story-meta"><span class="tag">20 min</span><span class="tag easy">Facile</span><span class="tag">4 énigmes</span></div>
+          </div>
+        </div>
+        <div class="story-card murder" onclick="selectStory(this,3)">
+          <div class="story-ico" style="background:rgba(255,107,107,.1);color:#ff6b6b">DV</div>
+          <div class="story-info">
+            <h3>Mort au Domaine de Vaubelle</h3>
+            <p>Un meurtre pendant le gala. Chaque joueur incarne un suspect avec ses propres secrets.</p>
+            <div class="story-meta"><span class="tag murder">Murder party</span><span class="tag hard">Difficile</span><span class="tag">4-8 joueurs</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" style="border-top: 1px solid var(--bd)" id="pricing-anchor">
+    <div class="wrap">
+      <h2 class="section-title">Tarifs simples et transparents</h2>
+      <p class="section-sub">Sans engagement. Changez de formule quand vous voulez.</p>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div>
+            <div class="price-name">Découverte</div>
+            <div class="price-amount"><sup>€</sup>0 <span>/ mois</span></div>
+          </div>
+          <ul class="price-list">
+            <li class="on">3 parties par mois</li>
+            <li class="on">Jusqu'à 4 joueurs</li>
+            <li class="on">2 histoires disponibles</li>
+            <li>QR codes personnalisés</li>
+            <li>Murder party</li>
+            <li>Historique des parties</li>
+          </ul>
+          <button class="btn btn-ghost btn-block" onclick="show('signup')">Commencer gratuitement</button>
+        </div>
+        <div class="price-card featured">
+          <div class="price-badge">Le plus populaire</div>
+          <div>
+            <div class="price-name">Organisateur</div>
+            <div class="price-amount"><sup>€</sup>12 <span>/ mois</span></div>
+          </div>
+          <ul class="price-list">
+            <li class="on">Parties illimitées</li>
+            <li class="on">Jusqu'à 12 joueurs</li>
+            <li class="on">4 histoires disponibles</li>
+            <li class="on">QR codes personnalisés avec logo</li>
+            <li class="on">Murder party</li>
+            <li class="on">Historique complet</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="show('payment')">Choisir cette formule</button>
+        </div>
+        <div class="price-card">
+          <div>
+            <div class="price-name">Équipe</div>
+            <div class="price-amount"><sup>€</sup>39 <span>/ mois</span></div>
+          </div>
+          <ul class="price-list">
+            <li class="on">Tout du plan Organisateur</li>
+            <li class="on">5 organisateurs</li>
+            <li class="on">Tableau de bord partagé</li>
+            <li class="on">Rapports d'activité</li>
+            <li class="on">Support prioritaire</li>
+            <li class="on">Histoires sur mesure (à venir)</li>
+          </ul>
+          <button class="btn btn-ghost btn-block" onclick="show('payment')">Contacter l'équipe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid var(--bd); padding: 32px 0; text-align:center">
+    <div class="wrap">
+      <p style="font-size:14px; color:var(--mu); margin:0">© 2024 Évasion — Tous droits réservés</p>
+    </div>
+  </footer>
+</div>
+
+<!-- AUTH : CONNEXION ───────────────────────────────── -->
+<div id="login" class="view">
+  <div id="auth">
+    <div class="auth-box">
+      <div class="auth-logo">Éva<span>sion</span></div>
+      <h2 class="auth-title">Connexion</h2>
+      <p class="auth-sub">Accédez à votre espace organisateur.</p>
+      <div class="field"><label>Adresse e-mail</label><input type="email" placeholder="vous@exemple.fr"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-block" onclick="show('dash')">Se connecter</button>
+      <div class="auth-switch">Pas encore de compte ? <a onclick="show('signup')">Créer un compte</a></div>
+      <div style="margin-top:12px; text-align:center">
+        <a style="font-size:13px;color:var(--mu);text-decoration:none;cursor:pointer">Mot de passe oublié ?</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH : INSCRIPTION ──────────────────────────────── -->
+<div id="signup" class="view">
+  <div id="auth">
+    <div class="auth-box">
+      <div class="auth-logo">Éva<span>sion</span></div>
+      <h2 class="auth-title">Créer un compte</h2>
+      <p class="auth-sub">Gratuit, sans carte bancaire.</p>
+      <div class="field"><label>Prénom</label><input type="text" placeholder="Votre prénom"></div>
+      <div class="field"><label>Adresse e-mail</label><input type="email" placeholder="vous@exemple.fr"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" placeholder="8 caractères minimum"></div>
+      <button class="btn btn-primary btn-block" onclick="show('dash')">Créer mon compte</button>
+      <div class="auth-switch">Déjà un compte ? <a onclick="show('login')">Se connecter</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAIEMENT STRIPE ─────────────────────────────────── -->
+<div id="payment" class="view">
+  <div id="auth">
+    <div class="auth-box" style="max-width:460px">
+      <div class="auth-logo">Éva<span>sion</span></div>
+      <h2 class="auth-title">Passer à Organisateur</h2>
+      <p class="auth-sub">12 € / mois — Annulable à tout moment.</p>
+      <div class="stripe-row">
+        <svg width="38" height="16" viewBox="0 0 38 16" fill="none">
+          <path d="M17.5 6.2c0-2.3-1.5-3.7-3.8-3.7-2.5 0-4.2 1.7-4.2 4.2 0 2.8 1.7 4.2 4.4 4.2 1.3 0 2.3-.3 3-.7V8.6c-.7.4-1.5.6-2.6.6-1 0-1.9-.4-2-.1.4h4.8c0-.2.4-2.3.4-2.9zm-4.8 1.8c0-.6.5-2.3 2-2.3 1.4 0 1.8 1.7 1.8 2.3h-3.8zm10.2-5.5c-.9 0-1.4.4-1.8.7l-.1-.6H19v11l2.2-.5V12c.4.3.9.5 1.7.5 1.7 0 3.3-1.4 3.3-4.3-.1-2.7-1.6-3.7-3.3-3.7zm-.6 6c-.6 0-.9-.2-1.2-.5V6.8c.3-.3.6-.5 1.2-.5 1 0 1.6.9 1.6 2.1 0 1.3-.7 2.1-1.6 2.1zM10.2 5.5L8 11.1 5.8 5.5H3.5L6.7 13l-1.8 4H7l4.7-11.5H10.2zm22.5 5.7c-1.7 0-2.8-1.4-2.8-2.9 0-1.5.9-2.8 2.8-2.8.8 0 1.4.3 1.9.6L35.4 4c-.6-.5-1.5-.8-2.6-.8-2.8 0-5 2.2-5 4.9 0 2.7 2.1 4.7 4.9 4.7 1.2 0 2.1-.3 2.8-.9l-.8-1.7c-.5.3-1.1.5-2 .5z" fill="#635BFF"/>
+        </svg>
+        <p><strong>Paiement sécurisé par Stripe.</strong> Vos données bancaires ne transitent jamais par nos serveurs.</p>
+      </div>
+      <div class="field"><label>Numéro de carte</label><input type="text" placeholder="1234 5678 9012 3456" maxlength="19"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>Date d'expiration</label><input type="text" placeholder="MM / AA" maxlength="7"></div>
+        <div class="field"><label>CVC</label><input type="text" placeholder="123" maxlength="4"></div>
+      </div>
+      <div class="field"><label>Nom sur la carte</label><input type="text" placeholder="DUPONT Marie"></div>
+      <button class="btn btn-primary btn-block" onclick="paySuccess()">Payer 12,00 €</button>
+      <p style="font-size:12px;color:var(--mu);text-align:center;margin-top:12px">Vous serez débité de 12 € le même jour chaque mois. Annulation possible dans les paramètres.</p>
+      <div class="auth-switch"><a onclick="show('landing')">Revenir à l'accueil</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD ───────────────────────────────────────── -->
+<div id="dash" class="view">
+  <div id="dash">
+    <div class="dash-header">
+      <div class="wrap dash-nav">
+        <a class="dash-brand" href="#" onclick="show('landing')">Éva<span>sion</span></a>
+        <div class="user-chip">
+          <span>Marie Dupont</span>
+          <div class="avatar">M</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="wrap">
+        <div class="tabs">
+          <button class="tab on" onclick="switchTab(this,'tab-home')">Mes parties</button>
+          <button class="tab" onclick="switchTab(this,'tab-create')">Nouvelle partie</button>
+          <button class="tab" onclick="switchTab(this,'tab-qr')">QR codes</button>
+        </div>
+
+        <!-- TAB : PARTIES -->
+        <div id="tab-home">
+          <div class="stats">
+            <div class="stat-box"><div class="val">8</div><div class="lbl">Parties jouées</div></div>
+            <div class="stat-box"><div class="val">47</div><div class="lbl">Joueurs au total</div></div>
+            <div class="stat-box"><div class="val">6</div><div class="lbl">Victoires</div></div>
+          </div>
+          <div class="table-wrap">
+            <div class="table-head"><div>Histoire</div><div>Date</div><div>Joueurs</div><div>Statut</div><div>Accès</div></div>
+            <div class="table-row">
+              <div><strong>Manoir Blackwood</strong></div>
+              <div style="color:var(--mu);font-size:13px">Aujourd'hui</div>
+              <div style="color:var(--mu)">5</div>
+              <div><span class="badge badge-active">En cours</span></div>
+              <div><button class="btn btn-primary btn-sm" onclick="show('lobby')">Rejoindre</button></div>
+            </div>
+            <div class="table-row">
+              <div><strong>Mort à Vaubelle</strong></div>
+              <div style="color:var(--mu);font-size:13px">Hier</div>
+              <div style="color:var(--mu)">7</div>
+              <div><span class="badge badge-done">Terminée</span></div>
+              <div><button class="btn btn-ghost btn-sm">Voir</button></div>
+            </div>
+            <div class="table-row">
+              <div><strong>Station Orion-7</strong></div>
+              <div style="color:var(--mu);font-size:13px">Lun. 28 oct.</div>
+              <div style="color:var(--mu)">4</div>
+              <div><span class="badge badge-done">Terminée</span></div>
+              <div><button class="btn btn-ghost btn-sm">Voir</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB : CRÉER -->
+        <div id="tab-create" style="display:none">
+          <div style="max-width:520px">
+            <div class="field">
+              <label>Choisissez une histoire</label>
+              <select>
+                <option>Le Manoir Blackwood — 25 min · Difficile</option>
+                <option>Station Orion-7 — 20 min · Moyen</option>
+                <option>Le Trésor de Barbe-Rouge — 20 min · Facile</option>
+                <option>Mort au Domaine de Vaubelle — Murder party</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Nombre maximum de joueurs</label>
+              <select>
+                <option>4 joueurs</option>
+                <option selected>8 joueurs</option>
+                <option>12 joueurs</option>
+              </select>
+            </div>
+            <div class="card card-sm" style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:14px;font-weight:600;margin-bottom:2px">QR code personnalisé</div>
+                  <div style="font-size:13px;color:var(--mu)">Votre logo sera intégré au QR code généré</div>
+                </div>
+                <div class="badge badge-paid">Organisateur</div>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:auto" onclick="show('lobby')">Créer la partie</button>
+          </div>
+        </div>
+
+        <!-- TAB : QR -->
+        <div id="tab-qr" style="display:none">
+          <div style="max-width:520px">
+            <p style="color:var(--mu);font-size:14px;margin-top:0">Chaque QR code est lié à une session unique. Il ne fonctionne qu'avec l'application Évasion. Votre logo est intégré automatiquement.</p>
+            <div class="qr-panel">
+              <div id="qr-dash"></div>
+              <div class="session-code">GH4K</div>
+              <p style="font-size:14px;color:var(--mu);margin:0">Manoir Blackwood — Session en cours</p>
+              <div class="secure-note"><div class="secure-dot"></div>QR code sécurisé · Évasion uniquement</div>
+              <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn btn-primary btn-sm" onclick="toast('QR code copié')">Copier le lien</button>
+                <button class="btn btn-ghost btn-sm" onclick="toast('QR code téléchargé')">Télécharger</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY ───────────────────────────────────────────── -->
+<div id="lobby" class="view">
+  <nav>
+    <div class="wrap nav-inner">
+      <a class="brand" onclick="show('dash')" style="cursor:pointer">Éva<span>sion</span></a>
+      <button class="btn btn-ghost btn-sm" onclick="show('dash')">Quitter</button>
+    </div>
+  </nav>
+  <div class="lobby-panel">
+    <h2 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em;margin:0 0 6px">Le Manoir Blackwood</h2>
+    <p style="color:var(--mu);font-size:14px;margin:0 0 28px">Partagez le code ou le QR code pour inviter les joueurs.</p>
+
+    <div class="lobby-code-block">
+      <p style="font-size:12px;color:var(--mu);margin:0 0 12px;font-weight:600;letter-spacing:.06em">CODE DE LA PARTIE</p>
+      <div class="session-code" style="margin:0 0 20px">GH4K</div>
+      <div class="lobby-qr-frame" id="qr-lobby"></div>
+      <div class="secure-note" style="display:flex;justify-content:center;margin-top:10px">
+        <div class="secure-dot"></div>Accès Évasion uniquement — expire à la fin de la partie
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <p style="font-size:13px;color:var(--mu);margin:0 0 12px;font-weight:600">Joueurs connectés (3/8)</p>
+      <div class="players-strip">
+        <span class="player-chip me">Marie (vous)</span>
+        <span class="player-chip">Thomas</span>
+        <span class="player-chip">Camille</span>
+        <span class="player-chip" style="border-style:dashed;color:var(--mu)">En attente…</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="show('game')">Lancer la partie</button>
+  </div>
+</div>
+
+<!-- PAGE JOUEUR : REJOINDRE ─────────────────────────── -->
+<div id="join-view" class="view">
+  <div id="join-page">
+    <div class="join-box">
+      <div class="auth-logo" style="margin-bottom:20px">Éva<span>sion</span></div>
+      <h2 class="join-title">Rejoindre une partie</h2>
+      <p class="join-sub">Entrez le code à 4 lettres affiché par l'hôte, ou scannez le QR code.</p>
+      <div class="field"><label>Votre prénom</label><input type="text" placeholder="ex. Thomas" maxlength="14"></div>
+      <div class="field"><label>Code de la partie</label><input class="input-code" type="text" placeholder="CODE" maxlength="4"></div>
+      <button class="btn btn-primary btn-block" onclick="show('role-view')">Rejoindre</button>
+      <div style="text-align:center;margin-top:16px">
+        <a style="font-size:13px;color:var(--mu);text-decoration:none;cursor:pointer" onclick="show('landing')">Retour à l'accueil</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JEU : CARTE DE RÔLE ─────────────────────────────── -->
+<div id="role-view" class="view">
+  <div id="game">
+    <div class="game-top">
+      <div class="game-top-inner">
+        <span style="font-size:14px;font-weight:600">Le Manoir Blackwood</span>
+        <span class="badge badge-active">Lobby</span>
+      </div>
+    </div>
+    <div class="game-body">
+      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em;margin:0 0 6px">Votre rôle</h1>
+      <p style="color:var(--mu);font-size:14px;margin:0 0 24px">Lisez ces informations en secret. Ne les montrez à personne.</p>
+      <div class="role-card">
+        <div class="role-tier principal">Rôle principal</div>
+        <div class="role-name">Comtesse Isabelle de Vaubelle</div>
+        <div class="role-desc">Épouse du comte. Élégante, réservée, très entourée ce soir.</div>
+        <div class="secret-block">
+          <h4>Votre secret</h4>
+          <p>Votre mari voulait divorcer et vous déshériter. Vous avez quitté la table à 21 h 30 pour une migraine et êtes restée seule dans votre chambre. Vous êtes innocente, mais vous avez un mobile : ne vous laissez pas accuser.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <p style="font-size:13px;color:var(--mu);margin:0">Trois autres joueurs ont des rôles principaux. Les autres ont des rôles secondaires. Tous ont des informations que vous n'avez pas.</p>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="show('game-view')" style="margin-top:20px">Commencer l'enquête</button>
+    </div>
+  </div>
+</div>
+
+<!-- JEU : ÉCRAN D'ENQUÊTE ───────────────────────────── -->
+<div id="game-view" class="view">
+  <div id="game">
+    <div class="game-top">
+      <div class="game-top-inner">
+        <span style="font-size:14px;font-weight:500;color:var(--mu)">Manche 1 — La découverte</span>
+        <span class="timer" id="timer-display">18:42</span>
+      </div>
+      <div class="progress-bar"><i id="progress-fill" style="width:80%"></i></div>
+    </div>
+    <div class="game-body">
+      <div class="step-dots">
+        <i class="done"></i><i class="curr"></i><i></i>
+      </div>
+      <h2 class="enigma-title">L'heure du crime</h2>
+      <p style="color:var(--mu);font-size:15px">La montre de la victime s'est brisée dans sa chute. À quelle heure exacte Victor est-il mort ? Saisissez quatre chiffres au format 24 h (ex. 0830).</p>
+
+      <div class="card" style="margin-top:20px">
+        <p style="font-size:12px;font-weight:600;color:var(--mu);margin:0 0 12px;letter-spacing:.06em">VOS INDICES</p>
+        <div class="clue-card">La montre brisée indique 22 h 40.</div>
+        <div class="clue-card">Le médecin note que cette montre avançait de 20 minutes.</div>
+        <p style="font-size:13px;color:var(--mu);margin:12px 0 0">Décrivez vos indices à voix haute — les autres ne les voient pas.</p>
+      </div>
+
+      <div class="ans-row">
+        <input type="text" id="ans-input" placeholder="Votre réponse" autocomplete="off">
+        <button class="btn btn-primary" onclick="showEvent()">Valider</button>
+      </div>
+      <div id="event-zone"></div>
+
+      <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="showHint()">Demander un indice (−30 s)</button>
+        <div class="players-strip" style="margin:0">
+          <span class="player-chip me">Marie</span>
+          <span class="player-chip">Thomas</span>
+          <span class="player-chip">Camille</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JEU : VOTE ──────────────────────────────────────── -->
+<div id="vote-view" class="view">
+  <div id="game">
+    <div class="game-top">
+      <div class="game-top-inner">
+        <span style="font-size:14px;font-weight:500">Mort au Domaine de Vaubelle</span>
+        <span class="badge badge-active">Vote</span>
+      </div>
+    </div>
+    <div class="game-body">
+      <h1 style="font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.02em;margin:0 0 8px">Qui est le meurtrier ?</h1>
+      <p style="color:var(--mu);font-size:14px;margin:0 0 24px">Votes : 2 / 4. Accusez l'un des suspects.</p>
+      <div class="vote-grid">
+        <button class="vote-btn sel" onclick="selectVote(this)"><span class="vn">Maître Henri Lacroix</span><span class="vp">Notaire</span></button>
+        <button class="vote-btn" onclick="selectVote(this)"><span class="vn">Comtesse Isabelle</span><span class="vp">Épouse du comte</span></button>
+        <button class="vote-btn" onclick="selectVote(this)"><span class="vn">Clara de Vaubelle</span><span class="vp">Nièce, étudiante</span></button>
+        <button class="vote-btn" onclick="selectVote(this)"><span class="vn">Docteur Garnier</span><span class="vp">Médecin de famille</span></button>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="show('end-view')" style="margin-top:20px">Confirmer mon vote</button>
+    </div>
+  </div>
+</div>
+
+<!-- JEU : FIN ───────────────────────────────────────── -->
+<div id="end-view" class="view">
+  <div id="game">
+    <div class="game-body">
+      <div class="end-banner">
+        <h1 class="end-title">Le coupable est démasqué</h1>
+        <p class="end-score">3 bonnes réponses · 12 min restantes · Score 780</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 16px">Résolution</h3>
+        <p style="font-size:15px;margin:0 0 16px">Maître Lacroix avait détourné 50 000 francs au comte. Pris à la gorge, il a versé la mort-aux-rats dans la carafe de cognac. Votre équipe a voté juste.</p>
+        <table class="reveal-table">
+          <tr><td><strong>Marie</strong> (Comtesse)</td><td>A voté : Maître Lacroix</td></tr>
+          <tr><td><strong>Thomas</strong> (Maître Lacroix)</td><td>A voté : Comtesse</td></tr>
+          <tr><td><strong>Camille</strong> (Clara)</td><td>A voté : Maître Lacroix</td></tr>
+        </table>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="show('lobby')">Rejouer</button>
+        <button class="btn btn-ghost" onclick="show('dash')">Tableau de bord</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── NAV ─────────────────────────────────────────────── */
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.getElementById(id)?.classList.add('on');
+  window.scrollTo(0, 0);
+  if (id === 'tab-qr' || id === 'lobby') buildQR('qr-lobby', 'GH4K');
+  if (id === 'dash') { buildQR('qr-preview', 'DEMO'); buildQR('qr-dash', 'GH4K'); }
+}
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.getElementById(tabId).style.display = '';
+  if (tabId === 'tab-qr') buildQR('qr-dash', 'GH4K');
+}
+
+/* ── QR ──────────────────────────────────────────────── */
+const builtQR = {};
+function buildQR(containerId, code) {
+  const c = document.getElementById(containerId);
+  if (!c || builtQR[containerId]) return;
+  builtQR[containerId] = true;
+  c.innerHTML = '';
+  new QRCode(c, {
+    text: `${location.origin}${location.pathname}#join/${code}`,
+    width: 148, height: 148,
+    colorDark: '#08080f', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+// Build landing QR on load
+buildQR('qr-preview', 'DEMO');
+
+/* ── STRIPE MOCK ─────────────────────────────────────── */
+function paySuccess() {
+  toast('Paiement validé — Bienvenue sur Organisateur !');
+  setTimeout(() => show('dash'), 1200);
+}
+
+/* ── GAME DEMO ───────────────────────────────────────── */
+function showEvent() {
+  const v = document.getElementById('ans-input')?.value.trim();
+  const z = document.getElementById('event-zone');
+  if (!v || !z) return;
+  const ok = ['2220','22h20'].includes(v.toLowerCase().replace(/\s/g,''));
+  z.innerHTML = `<div class="event-msg ${ok?'ok':'ko'}">${ok ? 'Marie : Correct — le crime a eu lieu à 22 h 20 !' : 'Marie : Mauvaise réponse (−15 s)'}</div>`;
+  if (ok) document.getElementById('ans-input').value = '';
+}
+function showHint() {
+  const z = document.getElementById('event-zone');
+  if (z) z.innerHTML = `<div class="event-msg">Indice : 22 h 40 moins 20 minutes.</div>`;
+}
+function selectStory(el, i) {
+  document.querySelectorAll('.story-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function selectVote(btn) {
+  document.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+/* ── TIMER DEMO ──────────────────────────────────────── */
+let sec = 1122;
+function tickTimer() {
+  if (!document.getElementById('timer-display')) return;
+  const el = document.getElementById('timer-display');
+  const pf = document.getElementById('progress-fill');
+  if (el) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    el.textContent = m + ':' + String(s).padStart(2, '0');
+    el.classList.toggle('warning', sec < 120);
+  }
+  if (pf) pf.style.width = Math.min(100, sec / 1800 * 100) + '%';
+  if (sec > 0) sec--;
+}
+setInterval(tickTimer, 1000);
+tickTimer();
+
+/* ── TOAST ───────────────────────────────────────────── */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 2500);
+}
+</script>
+</body>
+</html>
